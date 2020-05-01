@@ -24,13 +24,17 @@ namespace WonderMediaProductions.WebRtc
         const int VideoFrameHeight = 1080*2;
         const int VideoFrameRate = 60;
 
+        static RtcRenderingServer()
+        {
+            var options = new GlobalOptions
+                          {
+                              MinimumLogLevel = TraceLevel.Info
+                          };
+            PeerConnection.Configure(options);
+        }
+
         private static IRenderer CreateRenderer(ObservableVideoTrack videoTrack, ILogger logger)
         {
-            PeerConnection.Configure(new GlobalOptions
-            {
-                MinimumLogLevel = TraceLevel.Info
-            });
-
             bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
             bool supportsNvEnc = PeerConnection.SupportsHardwareTextureEncoding;
 
