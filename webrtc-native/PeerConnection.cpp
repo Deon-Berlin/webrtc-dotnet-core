@@ -93,6 +93,27 @@ PeerConnection::~PeerConnection()
 {
     // Destruct all data channels.
     data_channels_.clear();
+#ifdef HAS_LOCAL_VIDEO_OBSERVER
+    if (local_video_observer_)
+    {
+        RegisterOnLocalArgbFrameReady(nullptr);
+    }
+#endif
+
+#ifdef HAS_REMOTE_VIDEO_OBSERVER
+    if (remote_video_observer_)
+    {
+        RegisterOnRemoteI420FrameReady(nullptr);
+        for (const auto& transceiver : peer_connection_->GetTransceivers())
+        {
+            if (!transceiver->stopped() && transceiver->media_type() == cricket::MEDIA_TYPE_VIDEO)
+            {
+                transceiver->Stop();
+            }
+        }
+    }
+#endif
+    video_tracks_.clear();
 }
 
 bool PeerConnection::CreateOffer()
