@@ -170,14 +170,23 @@ bool PeerConnection::CreateTransceivers() const
 void PeerConnection::OnSuccess(
     webrtc::SessionDescriptionInterface* desc)
 {
-    peer_connection_->SetLocalDescription(
-        DummySetSessionDescriptionObserver::Create(), desc);
+    // Comment from PeerConnection::SetLocalDescription()
+    // The SetLocalDescription contract is that we take ownership of the session
+    // description regardless of the outcome
 
+    // so we have to take values from desc before calling SetLocalDescription
     std::string sdp;
-    desc->ToString(&sdp);
+    std::string type;
+    if (OnLocalSdpReadyToSend)
+    {
+        desc->ToString(&sdp);
+        type = desc->type();
+    }
+
+    peer_connection_->SetLocalDescription(DummySetSessionDescriptionObserver::Create(), desc);
 
     if (OnLocalSdpReadyToSend)
-        OnLocalSdpReadyToSend(desc->type().c_str(), sdp.c_str());
+        OnLocalSdpReadyToSend(type.c_str(), sdp.c_str());
 }
 
 void PeerConnection::OnFailure(webrtc::RTCError error)
